@@ -1,7 +1,7 @@
 # eleventy-plugin-static-jsx
 
-This is a plugin for [Eleventy](https://www.11ty.dev/) to add support for JSX as
-a template format, using
+This is a plugin for [Eleventy](https://www.11ty.dev/) to add support for JSX
+and [MDX](https://mdxjs.com/) as template formats, using
 [static-jsx](https://github.com/ianprime0509/static-jsx).
 
 ## Installation
@@ -34,10 +34,34 @@ module.exports = function (eleventyConfig) {
 
 ## Usage
 
-Any `.jsx` template file must export at least a `render` function, which returns
-`RawHtml` (the return type of any JSX expression under static-jsx). A `data`
-object is passed to `render` containing all the Eleventy data corresponding to
-the template, and
+### MDX
+
+`.mdx` template files are supported. Any YAML frontmatter is treated as template
+data, and any Eleventy data (including an additional `children` member
+containing any `content` as `RawHtml`) is passed as the `props` object.
+
+Here's an example of a simple MDX template:
+
+```mdx
+---
+layout: layouts/post.jsx
+title: Simple post
+---
+
+import Chart from "../_includes/Chart.jsx";
+
+This is a simple post with the title "{props.title}". Here is a chart showing
+something:
+
+<Chart />
+```
+
+### JSX
+
+Any `.jsx` template file must export at least a `render` function as the default
+export, which returns `RawHtml` (the return type of any JSX expression under
+static-jsx). A `data` object is passed to `render` containing all the Eleventy
+data corresponding to the template, and
 [JavaScript template functions](https://www.11ty.dev/docs/languages/javascript/#javascript-template-functions)
 are accessible on `this` within the render function (similar to the built-in
 `.11ty.js` template format). In addition to the usual data, a `children` member
@@ -51,7 +75,7 @@ serves as a top-level layout:
 ```jsx
 import { RawHtml } from "static-jsx";
 
-export function render({ children, title, today }) {
+export default function render({ children, title, today }) {
   return (
     <>
       {/* JSX doesn't support doctypes natively, so we have to use RawHtml */}
@@ -85,7 +109,7 @@ export const data = {
   layout: "layouts/main.jsx",
 };
 
-export function render({ children, title }) {
+export default function render({ children, title }) {
   return (
     <>
       <header>
