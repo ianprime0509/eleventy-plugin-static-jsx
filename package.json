@@ -2,9 +2,14 @@
   "name": "eleventy-plugin-static-jsx",
   "description": "JSX as an Eleventy template format using static-jsx.",
   "files": [
-    "index.js"
+    "index.js",
+    "evaluate.mjs",
+    "plugins"
   ],
   "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
   "scripts": {
     "fmt": "prettier --write .",
     "test": "run-p test:*",
