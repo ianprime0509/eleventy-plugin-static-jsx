@@ -1,59 +1,15 @@
 "use strict";
 
-const { Module, createRequire } = require("module");
-const path = require("path");
-const process = require("process");
-const vm = require("vm");
-
-const babel = require("@babel/core");
-
-function getModule(inputFile) {
-  const filename = path.resolve(process.cwd(), inputFile);
-  const scriptModule = new Module(filename, module);
-  scriptModule.filename = filename;
-  const baseRequire = createRequire(filename);
-  scriptModule.require = (id) => {
-    if ((id.startsWith("./") || id.startsWith("../")) && id.endsWith(".jsx")) {
-      return getModule(path.resolve(path.dirname(filename), id)).exports;
-    } else {
-      return baseRequire(id);
-    }
-  };
-  const ctx = vm.createContext({
-    module: scriptModule,
-    exports: scriptModule.exports,
-    require: scriptModule.require,
-  });
-
-  const { code } = babel.transformFileSync(inputFile, {
-    presets: [
-      [
-        require.resolve("@babel/preset-react"),
-        {
-          runtime: "automatic",
-          importSource: "static-jsx",
-        },
-      ],
-    ],
-    plugins: [require.resolve("@babel/plugin-transform-modules-commonjs")],
-  });
-
-  const script = new vm.Script(code, { filename });
-  script.runInContext(ctx);
-  return scriptModule;
-}
-
 module.exports = function (eleventyConfig) {
-  eleventyConfig.addTemplateFormats("jsx");
-  eleventyConfig.addExtension("jsx", {
+  const extension = {
     outputFileExtension: "html",
     read: false,
-    compile(_content, inputFile) {
-      const inputModule = getModule(inputFile);
-      // It is important to require the same static-jsx which was required by
-      // the temporary module or the RawHtml constructors will be different,
-      // resulting in improperly escaped output.
-      const { RawHtml, h } = inputModule.require("static-jsx");
+    async compile(_content, inputFile) {
+      const { RawHtml, h } = await import("static-jsx");
+      const { default: evaluateAndCompilePath } = await import(
+        "./evaluate.mjs"
+      );
+      const { default: component } = await evaluateAndCompilePath(inputFile);
 
       return (data) => {
         const children = [];
@@ -62,14 +18,15 @@ module.exports = function (eleventyConfig) {
         }
 
         return h(
-          inputModule.exports.render.bind(eleventyConfig.javascriptFunctions),
+          component.bind(eleventyConfig.javascriptFunctions),
           data,
           ...children
         ).html;
       };
     },
     async getData(inputFile) {
-      const data = getModule(inputFile).exports.data;
+      const { default: evaluate } = await import("./evaluate.mjs");
+      const { data } = await evaluate(inputFile);
       if (data === undefined || data === null) {
         return {};
       } else if (data instanceof Function) {
@@ -80,5 +37,10 @@ module.exports = function (eleventyConfig) {
         throw new Error(`Unexpected data format: ${data}`);
       }
     },
-  });
+  };
+
+  eleventyConfig.addTemplateFormats("jsx");
+  eleventyConfig.addExtension("jsx", extension);
+  eleventyConfig.addTemplateFormats("mdx");
+  eleventyConfig.addExtension("mdx", extension);
 };
