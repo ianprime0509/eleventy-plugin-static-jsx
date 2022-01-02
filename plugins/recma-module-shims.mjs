@@ -15,6 +15,8 @@
  * @property {string} [importName="__import"]
  * @property {string} [exportsName="__exports"]
  */
+// TODO: consider import assertions at some point
+// See https://github.com/xtuc/acorn-import-assertions for an option for parsing
 
 /**
  * @type {import("unified").Plugin<[RecmaModuleShimsOptions]|[], Program>}
@@ -36,6 +38,7 @@ export function recmaModuleShims({
 
   const importIdGenerator = idGenerator("__import");
   const exportIdGenerator = idGenerator("__export");
+  const tempIdGenerator = idGenerator("__temp");
 
   return (tree) => {
     const imports = [];
@@ -49,7 +52,11 @@ export function recmaModuleShims({
         case "ExportDefaultDeclaration":
           return transformExportDefaultDeclaration(child, exportIdGenerator);
         case "ExportAllDeclaration":
-          return transformExportAllDeclaration(child);
+          return transformExportAllDeclaration(
+            child,
+            importIdGenerator,
+            tempIdGenerator
+          );
         default:
           return [child];
       }
@@ -135,6 +142,7 @@ export function recmaModuleShims({
    */
   function transformExportNamedDeclaration(decl, importIdGenerator) {
     if (decl.declaration !== null) {
+      // e.g. export const a = 2;
       return [
         decl.declaration,
         ...getDeclaredIdentifiers(decl.declaration).map((id) =>
@@ -142,10 +150,12 @@ export function recmaModuleShims({
         ),
       ];
     } else if (decl.source !== null) {
+      // e.g. export { a, b as c } from "some-module";
       const importId = importIdGenerator();
       return [
         {
           type: "VariableDeclaration",
+          kind: "const",
           declarations: [
             {
               type: "VariableDeclarator",
@@ -164,6 +174,7 @@ export function recmaModuleShims({
         ),
       ];
     } else {
+      // e.g. export { a, b as c };
       return [
         ...decl.specifiers.map(({ exported, local }) =>
           exportAssignment(exported, local)
@@ -183,6 +194,9 @@ export function recmaModuleShims({
       decl.declaration.type === "ClassDeclaration"
     ) {
       if (decl.declaration.id === null) {
+        // e.g. export default function () {}
+        // Currently, we generate a name for the function/class to make the
+        // logic simpler.
         decl.declaration.id = exportIdGenerator();
       }
       return [
@@ -193,6 +207,7 @@ export function recmaModuleShims({
         ),
       ];
     } else {
+      // e.g. export default a;
       return [
         exportAssignment(
           { type: "Identifier", name: "default" },
@@ -205,12 +220,76 @@ export function recmaModuleShims({
   /**
    * @param {ExportAllDeclaration} decl
    * @param {() => Identifier} importIdGenerator
-   * @param {() => Identifier} exportIdGenerator
+   * @param {() => Identifier} tempIdGenerator
    * @returns {Array<Statement>}
    */
-  function transformExportAllDeclaration() {
-    // TODO
-    return [];
+  function transformExportAllDeclaration(
+    decl,
+    importIdGenerator,
+    tempIdGenerator
+  ) {
+    if (decl.exported !== null) {
+      // e.g. export * as ns from "some-module";
+      return [exportAssignment(decl.exported, awaitImport(decl.source))];
+    } else {
+      // e.g. export * from "some-module";
+      // We have to exclude the default import, which makes this a bit more
+      // complicated.
+      const tempIdDefault = tempIdGenerator();
+      const tempIdRest = tempIdGenerator();
+      return [
+        {
+          type: "VariableDeclaration",
+          kind: "const",
+          declarations: [
+            {
+              type: "VariableDeclarator",
+              id: {
+                type: "ObjectPattern",
+                properties: [
+                  {
+                    type: "Property",
+                    kind: "init",
+                    method: false,
+                    shorthand: false,
+                    computed: false,
+                    key: {
+                      type: "Identifier",
+                      name: "default",
+                    },
+                    value: tempIdDefault,
+                  },
+                  {
+                    type: "RestElement",
+                    argument: tempIdRest,
+                  },
+                ],
+              },
+              init: awaitImport(decl.source),
+            },
+          ],
+        },
+        {
+          type: "ExpressionStatement",
+          expression: {
+            type: "CallExpression",
+            callee: {
+              type: "MemberExpression",
+              computed: false,
+              object: {
+                type: "Identifier",
+                name: "Object",
+              },
+              property: {
+                type: "Identifier",
+                name: "assign",
+              },
+            },
+            arguments: [exportsObjectId, tempIdRest],
+          },
+        },
+      ];
+    }
   }
 
   /**
