@@ -122,6 +122,20 @@ export default function render({ children, title }) {
 }
 ```
 
+### Caveats
+
+Due to Node.js's current lack of (non-experimental) custom module loaders (which
+would be necessary for importing JSX and MDX files), exports and imports are
+internally transformed into something that allows a custom import function to be
+substituted. This internal transformation is missing several cases of `import`
+and `export` syntax (see the tests in `recma-module-shims.test.mjs`): in
+particular, dynamic imports (`await import`) are not transformed, so it is not
+possible to dynamically import other JSX and MDX files.
+
+This is not technically impossible to fix, but I will most likely wait until
+custom module loaders are more stable/usable and release a new major version
+which uses that (cleaner) approach.
+
 ## License
 
 This is free software, released under the
