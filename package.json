@@ -51,7 +51,7 @@
     "to-vfile": "^7.2.4",
     "unified": "^10.1.2",
     "vfile": "^5.3.7",
-    "yaml": "^2.2.2"
+    "yaml": "^2.3.1"
   },
   "devDependencies": {
     "eslint": "^8.41.0",
