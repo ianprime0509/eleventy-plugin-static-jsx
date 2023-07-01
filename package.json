@@ -48,7 +48,7 @@
     "estree-util-build-jsx": "^2.2.2",
     "remark-frontmatter": "^4.0.1",
     "static-jsx": "^1.0.1",
-    "to-vfile": "^7.2.4",
+    "to-vfile": "^8.0.0",
     "unified": "^10.1.2",
     "vfile": "^5.3.7",
     "yaml": "^2.2.2"
