@@ -50,7 +50,7 @@
     "static-jsx": "^1.0.1",
     "to-vfile": "^8.0.0",
     "unified": "^10.1.2",
-    "vfile": "^5.3.7",
+    "vfile": "^6.0.1",
     "yaml": "^2.3.1"
   },
   "devDependencies": {
