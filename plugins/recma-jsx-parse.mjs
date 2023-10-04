@@ -8,6 +8,6 @@ export function recmaJsxParse() {
       Parser.extend(acornJsx()).parse(content, {
         ecmaVersion: "latest",
         sourceType: "module",
-      })
+      }),
     );
 }

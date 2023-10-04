@@ -29,7 +29,7 @@ async function evaluate(compiled) {
   const exports = {};
   await func(
     async (id) => await transformingImport(id, compiled.path),
-    exports
+    exports,
   );
   return exports;
 }
