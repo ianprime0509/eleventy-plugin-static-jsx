@@ -20,7 +20,7 @@ module.exports = function (eleventyConfig) {
         return h(
           component.bind(eleventyConfig.javascriptFunctions),
           data,
-          ...children
+          ...children,
         ).html;
       };
     },

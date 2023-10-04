@@ -55,7 +55,7 @@ export function recmaModuleShims({
           return transformExportAllDeclaration(
             child,
             importIdGenerator,
-            tempIdGenerator
+            tempIdGenerator,
           );
         default:
           return [child];
@@ -146,7 +146,7 @@ export function recmaModuleShims({
       return [
         decl.declaration,
         ...getDeclaredIdentifiers(decl.declaration).map((id) =>
-          exportAssignment(id, id)
+          exportAssignment(id, id),
         ),
       ];
     } else if (decl.source !== null) {
@@ -170,14 +170,14 @@ export function recmaModuleShims({
             object: importId,
             property: local,
             computed: false,
-          })
+          }),
         ),
       ];
     } else {
       // e.g. export { a, b as c };
       return [
         ...decl.specifiers.map(({ exported, local }) =>
-          exportAssignment(exported, local)
+          exportAssignment(exported, local),
         ),
       ];
     }
@@ -203,7 +203,7 @@ export function recmaModuleShims({
         decl.declaration,
         exportAssignment(
           { type: "Identifier", name: "default" },
-          decl.declaration.id
+          decl.declaration.id,
         ),
       ];
     } else {
@@ -211,7 +211,7 @@ export function recmaModuleShims({
       return [
         exportAssignment(
           { type: "Identifier", name: "default" },
-          decl.declaration
+          decl.declaration,
         ),
       ];
     }
@@ -226,7 +226,7 @@ export function recmaModuleShims({
   function transformExportAllDeclaration(
     decl,
     importIdGenerator,
-    tempIdGenerator
+    tempIdGenerator,
   ) {
     if (decl.exported !== null) {
       // e.g. export * as ns from "some-module";
