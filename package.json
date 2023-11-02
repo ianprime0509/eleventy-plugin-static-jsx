@@ -45,7 +45,7 @@
     "acorn-jsx": "^5.3.2",
     "astring": "^1.8.6",
     "esast-util-from-estree": "^2.0.0",
-    "estree-util-build-jsx": "^2.2.2",
+    "estree-util-build-jsx": "^3.0.1",
     "remark-frontmatter": "^5.0.0",
     "static-jsx": "^1.0.1",
     "to-vfile": "^8.0.0",
