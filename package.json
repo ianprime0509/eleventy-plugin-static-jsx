@@ -46,7 +46,7 @@
     "astring": "^1.8.6",
     "esast-util-from-estree": "^2.0.0",
     "estree-util-build-jsx": "^2.2.2",
-    "remark-frontmatter": "^4.0.1",
+    "remark-frontmatter": "^5.0.0",
     "static-jsx": "^1.0.1",
     "to-vfile": "^8.0.0",
     "unified": "^11.0.3",
