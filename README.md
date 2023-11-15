@@ -69,6 +69,10 @@ is passed in the `data` option containing any `content` passed to the template
 wrapped in `RawHtml` so it behaves as `children` normally would in a JSX
 component.
 
+**Note:** when writing a JSX template, use the `children` prop for child content
+(as in standard React convention) rather than Eleventy's `content` to avoid
+double escaping the output.
+
 Here's an example of a simple JSX template using just a `render` function which
 serves as a top-level layout:
 
