@@ -49,7 +49,7 @@
     "remark-frontmatter": "^5.0.0",
     "static-jsx": "^1.0.1",
     "to-vfile": "^8.0.0",
-    "unified": "^11.0.3",
+    "unified": "^11.0.4",
     "vfile": "^6.0.1",
     "yaml": "^2.3.2"
   },
