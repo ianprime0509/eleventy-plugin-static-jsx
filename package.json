@@ -31,7 +31,7 @@
     "name": "Ian Johnson",
     "email": "ian@ianjohnson.dev"
   },
-  "license": "MIT",
+  "license": "0BSD",
   "bugs": {
     "url": "https://github.com/ianprime0509/eleventy-plugin-static-jsx/issues"
   },
