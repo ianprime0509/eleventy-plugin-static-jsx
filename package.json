@@ -40,7 +40,7 @@
     "@11ty/eleventy": "^2.0.0"
   },
   "dependencies": {
-    "@mdx-js/mdx": "^3.0.0",
+    "@mdx-js/mdx": "^3.0.1",
     "acorn": "^8.11.3",
     "acorn-jsx": "^5.3.2",
     "astring": "^1.8.6",
